@@ -1,0 +1,312 @@
+this file will show you some git skills
+
+
+windows使用git时出现：warning: LF will be replaced by CRLF
+
+windows中的换行符为 CRLF， 而在Linux下的换行符为LF，所以在执行add . 时出现提示，解决办法：
+[plain] view plain copy 在CODE上查看代码片派生到我的代码片
+$ rm -rf .git  // 删除.git  
+$ git config --global core.autocrlf false  //禁用自动转换    
+
+然后重新执行：
+[plain] view plain copy 在CODE上查看代码片派生到我的代码片
+$ git init    
+$ git add .  
+
+
+
+git add  文件
+git commit file -m "desc"
+git log  
+git reflog
+
+git reset --hard 版本号 工作区回退倒一个版本
+
+git reset HEAD 文件  可以把暂存区的修改撤销掉（unstage），重新放回工作区：
+
+git checkout -- 文件  --很重要，没有--，就变成了“切换到另一个分支”的命令
+
+命令git checkout -- readme.txt意思就是，把readme.txt文件在工作区的修改全部撤销，这里有两种情况：
+
+一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+
+一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+
+总之，就是让这个文件回到最近一次git commit或git add时的状态。
+
+git checkout其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”
+
+
+要关联一个远程库，使用命令git remote add origin git@server-name:path/repo-name.git；
+
+关联后，使用命令git push -u origin master第一次推送master分支的所有内容；
+
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；
+
+
+下一步是用命令git clone克隆一个本地库
+
+git clone git@github.com:JonHou-everbridge/gitskills.git
+
+小结
+
+要克隆一个仓库，首先必须知道仓库的地址，然后使用git clone命令克隆。
+
+Git支持多种协议，包括https，但通过ssh支持的原生git协议速度最快。
+
+
+git push origin master推送最新修改；
+git push 
+
+创建dev分支 然后切换到dev分支
+git checkout -b dev
+
+git checkout命令加上-b参数表示创建并切换，相当于以下两条命令
+git branch dev
+git checkout dev
+然后使用 git branch 命令查看当前分支
+$git branch
+* dev
+  master
+git branch 命令会列出所有分支，当前分支前面会有一个*号
+
+小结
+
+Git鼓励大量使用分支：
+
+查看分支：git branch
+
+创建分支：git branch <name>
+
+切换分支：git checkout <name>
+
+创建+切换分支：git checkout -b <name>
+
+合并某分支到当前分支：git merge <name>
+
+删除分支：git branch -d <name>
+
+
+如果两个分支都有修改的话merge会有冲突
+Git tracks changes of files.
+<<<<<<< HEAD
+Creating a new branch is quick & simple.
+=======
+Creating a new branch is quick AND simple.
+>>>>>>> feature1
+
+Git用<<<<<<<，=======，>>>>>>>标记出不同分支的内容
+先解决冲突再提交，提交后合并就已经完成了
+使用git log --graph 可以看到分支合并图
+
+另外
+
+$ git merge another
+$ git checkout another
+# modify, commit, modify, commit ...
+$ git checkout master
+$ git merge another
+但是，操作方便并不意味着这样操作就是合理的，在某些情况下，我们应该优先选择使用--squash选项，如下：
+
+
+$ git merge --squash anotherBranch               
+$ git commit -m "message here"
+
+--squash 选项的含义是：本地文件内容与不使用该选项的合并结果相同，但是不提交、不移动HEAD，因此需要一条额外的commit命令。其效果相当于将another分支上的多个commit合并成一个，放在当前分支上，原来的commit历史则没有拿过来。
+
+Note:
+
+判断是否使用--squash选项最根本的标准是，待合并分支上的历史是否有意义。
+
+如果在开发分支上提交非常随意，甚至写成微博体，那么一定要使用--squash选项。版本历史记录的应该是代码的发展，而不是开发者在编码时的活动。
+
+只有在开发分支上每个commit都有其独自存在的意义，并且能够编译通过的情况下（能够通过测试就更完美了），才应该选择缺省的合并方式来保留commit历史
+
+
+小结
+
+当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。
+
+因此，多人协作的工作模式通常是这样：
+
+首先，可以试图用git push origin branch-name推送自己的修改；
+
+如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+
+如果合并有冲突，则解决冲突，并在本地提交；
+
+没有冲突或者解决掉冲突后，再用git push origin branch-name推送就能成功！
+
+如果git pull提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream branch-name origin/branch-name。
+
+这就是多人协作的工作模式，一旦熟悉了，就非常简单。
+
+小结
+
+查看远程库信息，使用git remote -v；
+
+本地新建的分支如果不推送到远程，对其他人就是不可见的；
+
+从本地推送分支，使用git push origin local—-branch-name:origin-branch-name，如果推送失败，先用git pull抓取远程的新提交；
+
+在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+
+建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+
+从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+is  master branch
+
+
+
+git clone 默认会下载项目的完整历史版本，如果你只关心最新版的代码，而不关心之前的历史信息，可以使用 git 的浅复制功能：
+
+$ git clone --depth=1 https://github.com/bcit-ci/CodeIgniter.git
+--depth=1 表示只下载最近一次的版本，使用浅复制可以大大减少下载的数据量，例如， CodeIgniter 项目完整下载有近 100MiB ，而使用浅复制只有 5MiB 多，这样即使在恶劣的网络环境下，也可以快速的获得代码。
+如果之后又想获取完整历史信息，可以使用下面的命令：
+
+$ git fetch --unshallow
+
+mager test
+
+
+
+pull requests
+
+尝试不适用fork的情况下，创建一个新版本，然后提交，在gitsub上进行 pull requests
+
+git push origin branch-name
+
+#####
+
+合并 commit
+rebase -i 版本号
+
+如下 
+
+pick 32618c4 Start developing a feature
+pick 62eed47 Fix something from the previous commit
+ 
+# Commands:
+#  p, pick = use commit
+#  r, reword = use commit, but edit the commit message
+#  e, edit = use commit, but stop for amending
+#  s, squash = use commit, but meld into previous commit
+#  f, fixup = like "squash", but discard this commit's log message
+#  x, exec = run command (the rest of the line) using shell
+#
+# These lines can be re-ordered; they are executed from top to bottom.
+#
+# If you remove a line here THAT COMMIT WILL BE LOST.
+#
+# However, if you remove everything, the rebase will be aborted.
+#
+# Note that empty commits are commented out
+
+从上到下按时间ASC排序 ,将要和比较早的commit合并的 commit 前面的pick修改为s
+
+保存后
+进入commit 的 描述 的编辑界面，注释掉不需要的描述后保存
+
+看日志
+如过没有成功合并使用
+git rebase --abort   回退rebase
+
+
+
+修改 commit message
+git commit --amend
+
+
+保存工作区：
+
+git stash 可用来暂存当前正在进行的工作， 比如想pull 最新代码， 又不想加新commit， 或者另外一种情况，为了fix 一个紧急的bug,  先stash, 使返回到自己上一个commit, 改完bug之后再stash pop, 继续原来的工作。
+基础命令：
+$git stash
+$do some work
+$git stash pop
+
+进阶：
+Git stash save "work in progress for foo feature"
+当你多次使用’git stash’命令后，你的栈里将充满了未提交的代码，这时候你会对将哪个版本应用回来有些困惑，
+
+’git stash list’ 命令可以将当前的Git栈信息打印出来，你只需要将找到对应的版本号，例如使用’git stash apply stash@{1}’就可以将你指定版本号为stash@{1}的工作取出来，当你将所有的栈都应用回来的时候，可以使用’git stash clear’来将栈清空。
+
+
+git stash          # save uncommitted changes
+# pull, edit, etc.
+git stash list     # list stashed changes in this git
+git show stash@{0} # see the last stash 
+git stash pop      # apply last stash and remove it from the list
+
+git stash --help   # for more info
+
+
+
+----------- diff 显示修改的文件列表
+
+Git diff branch1 branch2 --stat
+
+加上 --stat 是显示文件列表, 否则是文件内容diff
+
+git diff --name-status HEAD~2 HEAD~3
+
+git diff <commit> <commit>
+上面的 <commit> 表示提交生成的 hash 串, 例如：
+
+git diff b45ba47d1b297217e3ec6a3ab0f61716a8d6ecbc c244d0bf06d56ec86aaedeefa5dcd84dd9febc60
+一般来说，通过 hash 串的前 4～6 位就可以区分，所示可以简写为：
+
+git diff b45b 355e
+
+查询某个人的所有提交
+$ git log --author="JonHou-everbridge" >> /d/mycommit.txt
+
+#查询某个提交的内容
+git show hashNumberOfCommit
+#查看提交内容
+git whatchanged
+
+
+##################
+现在有两个分支，分别为分支A、分支B。每个分支上都有若干次提交；
+分支A的提交commits有 a1, a2, a3, a4, a5，一共有五次提交；
+分支B的提交commits有 b1, b2, b3, b4, b5，一共有五次提交；
+当前位于分支A。
+
+注：以上10次提交的hash值不一样。
+
+请问：怎么只拉取分支B的 b2, b3, b4 提交节点到 分支A？
+
+要求，在拉取到分支A后，必须保留原来分支B上的提交信息。
+
+在A分支上执行
+git cherry-pick <commit_id>
+
+
+###########
+git 对比两个分支差异
+1.查看 dev 有，而 master 中没有的：
+
+git log dev ^master 
+
+同理查看 master 中有，而 dev 中没有的内容：
+
+git log master ^dev
+2.查看 dev 中比 master 中多提交了哪些内容：
+
+git log master..dev
+
+注意，列出来的是两个点后边（此处即dev）多提交的内容。同理，想知道 master 比 dev 多提交了什么：
+
+git log dev..master
+
+3.不知道谁提交的多谁提交的少，单纯想知道有什么不一样：
+
+git log dev...master
+
+4.在上述情况下，再显示出每个提交是在哪个分支上：
+
+git log --left-right dev...master
+
+注意结果中 commit 后面的箭头，根据我们在 –left-right dev…master 的顺序，左箭头 < 表示是 dev 的，右箭头 > 表示是 master的。
